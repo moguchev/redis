@@ -7,6 +7,7 @@ import (
 	"unsafe"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/moguchev/redis/models"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -38,10 +39,30 @@ func main() {
 		log.Println(cmd.Val()) // PONG
 	}
 
-	Get(ctx, client)
-	Mget(ctx, client)
+	// Get(ctx, client)
+	// Mget(ctx, client)
+	GetMarshalBinary(ctx, client)
 }
 
+func GetMarshalBinary(ctx context.Context, client *redis.Client) {
+	t := &models.DeliveryDateValue{
+		LocationUid: "",
+		WarehouseId: 1,
+		SourceId:    1,
+		IsBulk:      true,
+	}
+
+	log.Println("set key-1 with ex 2 sec")
+	if err := client.SetEX(ctx, t.Key(), t, 2*time.Second).Err(); err != nil {
+		log.Println("SetEX failed", err)
+	}
+
+	tcopy := new(models.DeliveryDateValue)
+	if err := client.Get(ctx, t.Key()).Scan(&tcopy); err != nil {
+		log.Println("Get failed", err)
+	}
+
+}
 func Get(ctx context.Context, client *redis.Client) {
 	raw, err := client.Get(ctx, "key").Bytes()
 	if err != nil {
