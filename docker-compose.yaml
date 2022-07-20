@@ -1,0 +1,18 @@
+services:
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: playground
+    volumes: 
+      - cache:/data
+    container_name: 'redis-container'
+    ports:
+      - 6379:6379
+    command: redis-server --save 60 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+
+volumes:
+  cache:
+    driver: local
